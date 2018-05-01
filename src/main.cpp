@@ -28,12 +28,33 @@ std::string hasData(std::string s) {
   return "";
 }
 
-int main()
+int main(int argc, char **argv)
 {
   uWS::Hub h;
 
   PID pid;
   // TODO: Initialize the pid variable.
+
+  // check if correct number of arguments are specified. 
+  if ((argc != 1) && (argc != 3)) {
+      std::cerr << "Invalid number of arguments: " << argc << std::endl;
+      std::cerr << "Usage: pid [<Kp> <Kd>]" << std::endl;
+      return -1;
+  }
+
+  // Set default values PID coefficients, these work reasonably well for simulator
+  double Kp = -0.12;
+  double Kd = -0.8;
+
+  // Apply CLI overrides for coefficients
+  if (argc == 5) {
+      Kp = atof(argv[1]);
+      Kd = atof(argv[2]);
+  }
+
+  // Initialize PID controller coefficients. Note that we are setting drift
+  // cofficients to 0 as we assume simulator has no drift.
+  pid.Init(Kp, 0.0, Kd);
 
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -57,13 +78,18 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
+
+          // Update error with current CTE value and get new steering value from PID controller.
+          // Adjust steering value to be in range [-1 1]
+          pid.UpdateError(cte);
+          steer_value = std::min(std::max(pid.TotalError(), -1.0), 1.0);
+
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = 0.4;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
