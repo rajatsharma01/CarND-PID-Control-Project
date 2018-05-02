@@ -2,6 +2,24 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
+## Reflections
+* Describe the effect each of the P, I, D components had in your implementation.
+
+Proportional component (**P**ID) tries to steer car towards lane center to minimize its error which is directly proportional to distance from lane center (Cross Track Error). Only using Proportional component can make car overshoot once it reaches the lane center. Because of cars momentum, it keeps oscillating around lane center and often jumps over the track boundary on curved lane.
+
+Differential component (PI**D**) helps avoid overshooting. While P component is trying to steer towards the lane center to minimize CTE, D component decelerates this rapid change by adding back steering in reverse direction which is proportional to rate of change in CTE. Net effect is the car arrives at lane center smoothly with lesser overshooting.
+
+Integral component (P**I**D) tries to address a constant systematic bias such as steering drift due to tyre rotation errors which constantly tries to pull away car from lane center. I component handles it by accounting for CTE over long period of time and steering against it which is proportional to sum of cross track errors (hence Integral).
+
+In this project, I have assumed no drift errors in simulator, hence kept I component to be 0. Below video first runs the pid binary with D component set to 0.0 which oviously works terrible and car eventually falls off the track pretty quick. Later on, I have added back D component and car successfully completes the track.
+
+[![project_video](http://img.youtube.com/vi/lGOE8Ja_OVw/0.jpg)](http://www.youtube.com/watch?v=lGOE8Ja_OVw)
+
+* Describe how the final hyperparameters were chosen.
+
+Nothing fancy here. I started with parameter values form Sebastian class and tunned them further with multiple trials, I finalized following choice of parameters:
+
+`Kp = 0.12, Ki = 0.0, Kd = 3.0`
 
 ## Dependencies
 
