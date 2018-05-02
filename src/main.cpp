@@ -43,11 +43,11 @@ int main(int argc, char **argv)
   }
 
   // Set default values PID coefficients, these work reasonably well for simulator
-  double Kp = -0.12;
-  double Kd = -0.8;
+  double Kp = 0.12;
+  double Kd = 3.0;
 
   // Apply CLI overrides for coefficients
-  if (argc == 5) {
+  if (argc == 3) {
       Kp = atof(argv[1]);
       Kd = atof(argv[2]);
   }
@@ -89,7 +89,7 @@ int main(int argc, char **argv)
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.4;
+          msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
